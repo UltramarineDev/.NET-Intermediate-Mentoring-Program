@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MultiThreading.Task3.MatrixMultiplier.Matrices;
 using MultiThreading.Task3.MatrixMultiplier.Multipliers;
@@ -8,6 +9,16 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
     [TestClass]
     public class MultiplierTest
     {
+        private MatricesMultiplier _sequenceMultiplier;
+        private MatricesMultiplierParallel _parallelMultiplier;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _sequenceMultiplier = new MatricesMultiplier();
+            _parallelMultiplier = new MatricesMultiplierParallel();
+        }
+
         [TestMethod]
         public void MultiplyMatrix3On3Test()
         {
@@ -18,8 +29,33 @@ namespace MultiThreading.Task3.MatrixMultiplier.Tests
         [TestMethod]
         public void ParallelEfficiencyTest()
         {
-            // todo: implement a test method to check the size of the matrix which makes parallel multiplication more effective than
-            // todo: the regular one
+            var matrixSize = 1;
+            long parallelTime;
+            long sequenceTime;
+            
+            do
+            {
+                var m1 = new Matrix(matrixSize, matrixSize, true);
+                var m2 = new Matrix(matrixSize, matrixSize, true);
+
+                var timer = Stopwatch.StartNew();
+
+                _sequenceMultiplier.Multiply(m1, m2);
+                timer.Stop();
+                sequenceTime = timer.ElapsedTicks;
+
+                timer = Stopwatch.StartNew();
+                
+                _parallelMultiplier.Multiply(m1, m2);
+                timer.Stop();
+                parallelTime = timer.ElapsedTicks;
+                
+                Console.WriteLine($"Matrix size: {matrixSize}, {sequenceTime}, {parallelTime}");
+
+                matrixSize++;
+            } while (sequenceTime < parallelTime);
+
+            Assert.IsTrue(sequenceTime >= parallelTime);
         }
 
         #region private methods
