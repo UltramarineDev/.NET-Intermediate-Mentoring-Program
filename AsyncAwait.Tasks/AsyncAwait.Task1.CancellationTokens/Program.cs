@@ -8,6 +8,8 @@
  */
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AsyncAwait.Task1.CancellationTokens
 {
@@ -46,17 +48,46 @@ namespace AsyncAwait.Task1.CancellationTokens
             Console.ReadLine();
         }
 
+        private static Task<long> task;
+        private static CancellationTokenSource cts;
+
         private static void CalculateSum(int n)
         {
-            // todo: make calculation asynchronous
-            long sum = Calculator.Calculate(n);
-            Console.WriteLine($"Sum for {n} = {sum}.");
-            Console.WriteLine();
-            Console.WriteLine("Enter N: ");
-            // todo: add code to process cancellation and uncomment this line    
-            // Console.WriteLine($"Sum for {n} cancelled...");
-                        
-            Console.WriteLine($"The task for {n} started... Enter N to cancel the request:");
+            if (task != null)
+            {
+                cts.Cancel();
+                try
+                {
+                    task.Wait();
+                }
+                catch (Exception)
+                {
+                }
+                cts.Dispose();
+            }
+
+            cts = new CancellationTokenSource();
+
+            task = new Task<long>(() =>
+            {
+                Console.WriteLine($"The task for {n} started... Enter N to cancel the request:");
+                return Calculator.Calculate(n, cts.Token);
+            }, cts.Token);
+
+            task.ContinueWith((t, o) =>
+            {
+                var sum = t.Result;
+                Console.WriteLine($"Sum for {n} = {sum}.");
+                Console.WriteLine();
+                Console.WriteLine("Enter N: ");
+            }, null, cts.Token, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
+            task.ContinueWith((t, o) =>
+            {
+                Console.WriteLine($"Sum for {n} cancelled...");
+            }, null, cts.Token, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
+
+            task.Start();
         }
     }
 }
