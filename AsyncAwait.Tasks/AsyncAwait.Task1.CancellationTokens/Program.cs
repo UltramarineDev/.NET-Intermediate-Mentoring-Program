@@ -85,7 +85,7 @@ namespace AsyncAwait.Task1.CancellationTokens
             task.ContinueWith((t, o) =>
             {
                 Console.WriteLine($"Sum for {n} cancelled...");
-            }, null, cts.Token, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
+            }, TaskContinuationOptions.OnlyOnFaulted);
 
             task.Start();
         }
