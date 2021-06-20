@@ -7,6 +7,8 @@
    Demonstrate the work of the each case with console utility.
 */
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MultiThreading.Task6.Continuation
 {
@@ -17,14 +19,63 @@ namespace MultiThreading.Task6.Continuation
             Console.WriteLine("Create a Task and attach continuations to it according to the following criteria:");
             Console.WriteLine("a.    Continuation task should be executed regardless of the result of the parent task.");
             Console.WriteLine("b.    Continuation task should be executed when the parent task finished without success.");
-            Console.WriteLine("c.    Continuation task should be executed when the parent task would be finished with fail and parent task thread should be reused for continuation.");
+            Console.WriteLine("c.    Continuation task should be executed when the parent task would be finished with fail " +
+                              "and parent task thread should be reused for continuation.");
             Console.WriteLine("d.    Continuation task should be executed outside of the thread pool when the parent task would be cancelled.");
             Console.WriteLine("Demonstrate the work of the each case with console utility.");
             Console.WriteLine();
 
-            // feel free to add your code
+            ProcessContinuationTasks();
 
             Console.ReadLine();
+        }
+
+        private static void ProcessContinuationTasks()
+        {
+            var exceptionTask = Task.Factory.StartNew(Execute);
+
+            exceptionTask.ContinueWith(result => ExecuteInOtherThread(),
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.AttachedToParent);
+            
+            exceptionTask.ContinueWith(result => ExecuteSynchronously(),
+                TaskContinuationOptions.ExecuteSynchronously 
+                | TaskContinuationOptions.AttachedToParent 
+                | TaskContinuationOptions.OnlyOnFaulted);
+
+            exceptionTask.ContinueWith(result => ExecuteOutsideOfThreadPool(),
+                TaskContinuationOptions.LongRunning | TaskContinuationOptions.AttachedToParent);
+
+            try
+            {
+                exceptionTask.Wait();
+
+            }
+            catch (AggregateException ex)
+            {
+                Console.WriteLine($"Exception: {ex.InnerException?.Message}");
+            }
+        }
+
+        private static void Execute()
+        {
+            Thread.CurrentThread.Name = "Exception Task";
+            throw new InvalidOperationException();
+        }
+
+        private static void ExecuteInOtherThread()
+        {
+            Thread.CurrentThread.Name = "Continuation Task";
+            Console.WriteLine($"Faulted in {Thread.CurrentThread.Name}");
+        }
+
+        private static void ExecuteSynchronously()
+        {
+            Console.WriteLine($"Task executes in {Thread.CurrentThread.Name}");
+        }
+
+        private static void ExecuteOutsideOfThreadPool()
+        {
+            Console.WriteLine($"Task executes outside of thread pool.");
         }
     }
 }
