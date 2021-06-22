@@ -13,6 +13,7 @@ namespace CorporateChat.CLient
     internal class Client
     {
         private readonly List<string> _messages;
+        private readonly Random _random;
 
         private const int MessagesSize = 10;
         private const int Port = 13000;
@@ -22,6 +23,7 @@ namespace CorporateChat.CLient
 
         public Client()
         {
+            _random = new Random();
             _messages = new List<string>();
             InitializeMessages();
         }
@@ -32,7 +34,7 @@ namespace CorporateChat.CLient
             {
                 while (!_shouldStop)
                 {
-                    Task.Run(ConnectToServer);
+                    ConnectToServer();
                 }
             }
             catch (Exception ex)
@@ -68,18 +70,16 @@ namespace CorporateChat.CLient
             }
         }
 
-        private static string GetClientName()
+        private string GetClientName()
         {
-            var rnd = new Random();
-            return $"Client {rnd.Next(MessagesSize)}";
+            return $"Client {_random.Next(100)}";
         }
 
         private void SendMessages(Stream stream, ChatMessageInfo messageInfo)
         {
             var formatter = new BinaryFormatter();
 
-            var rnd = new Random();
-            var countToSend = rnd.Next(MessagesSize);
+            var countToSend = _random.Next(MessagesSize);
 
             for (var i = 0; i < countToSend; i++)
             {
@@ -87,7 +87,7 @@ namespace CorporateChat.CLient
                 formatter.Serialize(stream, messageInfo);
 
                 Console.WriteLine($"Sent from {messageInfo.ClientName}: {messageInfo.Message}");
-                Thread.Sleep(rnd.Next(MessagesSize) * 1000);
+                Thread.Sleep(_random.Next(MessagesSize) * 1000);
             }
         }
 
@@ -101,8 +101,7 @@ namespace CorporateChat.CLient
 
         private string GetMessageToSend()
         {
-            var rnd = new Random();
-            var randomNumber = rnd.Next(_messages.Count);
+            var randomNumber = _random.Next(_messages.Count);
 
             return _messages[randomNumber];
         }
