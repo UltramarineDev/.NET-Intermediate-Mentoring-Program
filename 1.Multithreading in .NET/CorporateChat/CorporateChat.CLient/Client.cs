@@ -5,7 +5,6 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using CorporateChat.Models;
 
 namespace CorporateChat.CLient
@@ -19,20 +18,20 @@ namespace CorporateChat.CLient
         private const int Port = 13000;
         private const int BufferSize = 1024;
 
-        private bool _shouldStop;
-
         public Client()
         {
             _random = new Random();
             _messages = new List<string>();
+            
             InitializeMessages();
         }
 
-        public void Start()
+        public void Start(object obj)
         {
+            var cancellationToken = (CancellationToken)obj;
             try
             {
-                while (!_shouldStop)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     ConnectToServer();
                 }
@@ -41,11 +40,6 @@ namespace CorporateChat.CLient
             {
                 Console.WriteLine($"Unexpected exception: {ex}");
             }
-        }
-
-        public void Stop()
-        {
-            _shouldStop = true;
         }
 
         private void ConnectToServer()
@@ -87,7 +81,7 @@ namespace CorporateChat.CLient
                 formatter.Serialize(stream, messageInfo);
 
                 Console.WriteLine($"Sent from {messageInfo.ClientName}: {messageInfo.Message}");
-                Thread.Sleep(_random.Next(MessagesSize) * 1000);
+                Thread.Sleep(_random.Next(MessagesSize) * 100);
             }
         }
 
@@ -110,12 +104,10 @@ namespace CorporateChat.CLient
         {
             var buffer = new byte[BufferSize];
 
-            int length;
-            while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
-            {
-                var data = Encoding.ASCII.GetString(buffer, 0, length);
-                Console.WriteLine($"Received: {data}");
-            }
+            stream.Read(buffer, 0, buffer.Length);
+            var data = Encoding.ASCII.GetString(buffer);
+            
+            Console.WriteLine($"Received: {data}");
         }
     }
 }

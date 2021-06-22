@@ -1,22 +1,33 @@
 ﻿using System;
+using System.Threading;
 
 namespace CorporateChat.CLient
 {
     class Program
     {
+        public static object ServerClass { get; private set; }
+
         static void Main(string[] args)
         {
-            Console.WriteLine("Press 'q' to exit");
+            var cts = new CancellationTokenSource();
+
+            Console.WriteLine("Press 'C' to terminate the application...");
+            var uiThread = new Thread(() =>
+            {
+                var key = Console.ReadLine();
+                if (key.ToUpperInvariant() == "C")
+                {
+                    cts.Cancel();
+                }
+            });
 
             var client = new Client();
-            client.Start();
+            var workerThread = new Thread(client.Start);
 
-            var input = Console.ReadLine();
+            uiThread.Start();
+            workerThread.Start(cts.Token);
 
-            if (input == "q")
-            {
-                client.Stop();
-            }
+            workerThread.Join();
         }
     }
 }

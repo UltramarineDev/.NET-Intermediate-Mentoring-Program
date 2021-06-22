@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using CorporateChat.Models;
 
 namespace CorporateChat.Server
@@ -11,14 +13,14 @@ namespace CorporateChat.Server
     internal class Server
     {
         private readonly ChatLogs<string> _receivedMessages;
-        private readonly List<TcpClient> _connectedClients;
-
+        private readonly Dictionary<string, TcpClient> _connectedClients;
         private const int Port = 13000;
+        private const string StopMessage = "Server stopping...";
 
         public Server()
         {
             _receivedMessages = new ChatLogs<string>(10);
-            _connectedClients = new List<TcpClient>();
+            _connectedClients = new Dictionary<string, TcpClient>();
         }
 
         public void Listen()
@@ -27,7 +29,7 @@ namespace CorporateChat.Server
             try
             {
                 var localAddr = IPAddress.Parse("127.0.0.1");
-                
+
                 server = new TcpListener(localAddr, Port);
                 server.Start();
 
@@ -39,21 +41,8 @@ namespace CorporateChat.Server
 
                     Console.WriteLine("Connected");
 
-                    SendMessageHistory(client);
-                    _connectedClients.Add(client);
-                    
-                    var stream = client.GetStream();
-
-                    var formatter = new BinaryFormatter();
-
-                    var messageInfo = (ChatMessageInfo)formatter.Deserialize(stream);
-
-                    Console.WriteLine($"Received from client {messageInfo.ClientName}: {messageInfo.Message}");
-                    _receivedMessages.Add(messageInfo.Message);
-
-                    SendMessageToClients(messageInfo.Message);
-
-                    client.Close();
+                    var thread = new Thread(() => ProcessClient(client));
+                    thread.Start();
                 }
             }
             catch (Exception ex)
@@ -62,30 +51,70 @@ namespace CorporateChat.Server
             }
             finally
             {
-                SendStopNotification();
+                SendMessageToClients(StopMessage);
                 server?.Stop();
             }
         }
 
+        private void ProcessClient(TcpClient client)
+        {
+            while (true)
+            {
+                try
+                {
+                    var stream = client.GetStream();
+
+                    var formatter = new BinaryFormatter();
+                    var messageInfo = (ChatMessageInfo)formatter.Deserialize(stream);
+
+                    Console.WriteLine($"Received from client {messageInfo.ClientName}: {messageInfo.Message}");
+
+                    SendMessageHistory(client, messageInfo.ClientName);
+
+                    SendMessageToClients(messageInfo.Message);
+
+                    UpdateStoredData(messageInfo, client);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Unable to process client: {ex}");
+                    return;
+                }
+            }
+        }
+
+        private void UpdateStoredData(ChatMessageInfo messageInfo, TcpClient client)
+        {
+            if (messageInfo == null || client == null)
+            {
+                return;
+            }
+
+            if (!_connectedClients.ContainsKey(messageInfo.ClientName))
+            {
+                _connectedClients.Add(messageInfo.ClientName, client);
+            }
+
+            _receivedMessages.Add(messageInfo.Message);
+        }
+
         private void SendMessageToClients(string message)
         {
-            foreach (var client in _connectedClients)
+            var clients = _connectedClients.Values.Where(client => client.Connected);
+
+            foreach (var client in clients)
             {
-                if (!client.Connected)
-                {
-                    continue;
-                }
-                
                 var stream = client.GetStream();
 
                 var bytes = Encoding.ASCII.GetBytes(message);
                 stream.Write(bytes, 0, bytes.Length);
+                stream.Flush();
             }
         }
 
-        private void SendMessageHistory(TcpClient client)
+        private void SendMessageHistory(TcpClient client, string clientName)
         {
-            if (_connectedClients.Contains(client))
+            if (_connectedClients.ContainsKey(clientName))
             {
                 return;
             }
@@ -97,24 +126,8 @@ namespace CorporateChat.Server
                 var bytes = Encoding.ASCII.GetBytes(message);
                 stream.Write(bytes, 0, bytes.Length);
             }
-        }
 
-        private void SendStopNotification()
-        {
-            const string message = "Server stopping...";
-            
-            foreach (var client in _connectedClients)
-            {
-                if (!client.Connected)
-                {
-                    continue;
-                }
-                
-                var stream = client.GetStream();
-
-                var bytes = Encoding.ASCII.GetBytes(message);
-                stream.Write(bytes, 0, bytes.Length);
-            }
+            stream.Flush();
         }
     }
 }

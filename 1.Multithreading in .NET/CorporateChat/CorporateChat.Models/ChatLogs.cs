@@ -8,6 +8,7 @@ namespace CorporateChat.Models
     {
         private readonly ConcurrentQueue<T> _queue;
         private readonly int _maxCount;
+        private object obj = new object();
 
         public ChatLogs(int maxCount)
         {
@@ -17,12 +18,15 @@ namespace CorporateChat.Models
 
         public void Add(T item)
         {
-            if (_queue.Count == _maxCount)
+            lock (obj)
             {
-                _queue.TryDequeue(out _);
+                if (_queue.Count == _maxCount)
+                {
+                    _queue.TryDequeue(out _);
+                }
+
+                _queue.Enqueue(item);
             }
-            
-            _queue.Enqueue(item);
         }
 
         public IEnumerator<T> GetEnumerator() => _queue.GetEnumerator();
