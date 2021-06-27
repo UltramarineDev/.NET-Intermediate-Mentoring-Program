@@ -1,7 +1,8 @@
-﻿using Client.Models;
-using System;
+﻿using System;
 using System.IO;
+using Client.EventArgs;
 using Common;
+using Common.Models;
 
 namespace Client
 {
@@ -29,9 +30,13 @@ namespace Client
 
         private void Send(string path)
         {
-            var bytes = File.ReadAllBytes(path);
-
-            _queueClient.PublishMessage(bytes);
+            var message = new FileMessage
+            {
+                FileName = Path.GetFileName(path),
+                Data = File.ReadAllBytes(path)
+            };
+            
+            _queueClient.PublishMessage(message);
             
             Console.WriteLine("Message sent.");
 

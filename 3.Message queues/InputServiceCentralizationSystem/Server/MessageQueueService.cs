@@ -1,7 +1,7 @@
 ﻿using Common;
-using Common.Models;
 using System;
 using System.IO;
+using Common.EventArgs;
 
 namespace Server
 {
@@ -27,7 +27,7 @@ namespace Server
 
         private void ProcessMessage(object sender, MessageReceivedEventArgs e)
         {
-            File.WriteAllBytes($"{_pathToWrite}\\test.pdf", e.Body);
+            File.WriteAllBytes($"{_pathToWrite}\\{e.Message?.FileName}", e.Message?.Data);
         }
     }
 }

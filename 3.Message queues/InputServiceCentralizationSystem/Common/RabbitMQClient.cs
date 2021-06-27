@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using Common.EventArgs;
 using Common.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -13,7 +16,7 @@ namespace Common
         private const string QueueName = "fileQueue";
 
         private IModel _channel;
-        
+
         public event EventHandler<MessageReceivedEventArgs> MessageReceivedEvent;
 
         public RabbitMQClient()
@@ -36,9 +39,21 @@ namespace Common
             _channel.QueueDeclare(queue: QueueName, durable: true, exclusive: false, autoDelete: false, arguments: null);
         }
 
-        public void PublishMessage(byte[] body)
+        public void PublishMessage(FileMessage message)
         {
-            _channel.BasicPublish(exchange: string.Empty, routingKey: QueueName, basicProperties: null, body: body);
+            if (message == null)
+            {
+                return;
+            }
+
+            var formatter = new BinaryFormatter();
+            using var stream = new MemoryStream();
+
+            formatter.Serialize(stream, message);
+
+            var data = stream.ToArray();
+
+            _channel.BasicPublish(exchange: string.Empty, routingKey: QueueName, basicProperties: null, body: data);
         }
 
         public void Subscribe()
@@ -52,10 +67,16 @@ namespace Common
 
         private void HandleReceiveMessage(object model, BasicDeliverEventArgs e)
         {
-            var body = e.Body.ToArray();
-            
-            Console.WriteLine("Message received.");
+            var bytes = e.Body.ToArray();
 
+            Console.WriteLine("Message received.");
+            
+            var formatter = new BinaryFormatter();
+            
+            using var stream = new MemoryStream(bytes);
+
+            var message = (FileMessage)formatter.Deserialize(stream);
+            
             var messageReceivedEvent = MessageReceivedEvent;
 
             if (messageReceivedEvent == null)
@@ -63,7 +84,7 @@ namespace Common
                 return;
             }
 
-            var eventArgs = new MessageReceivedEventArgs(body);
+            var eventArgs = new MessageReceivedEventArgs(message);
 
             messageReceivedEvent(this, eventArgs);
         }

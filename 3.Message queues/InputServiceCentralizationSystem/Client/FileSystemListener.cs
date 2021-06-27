@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Client.Models;
+using Client.EventArgs;
 
 namespace Client
 {
