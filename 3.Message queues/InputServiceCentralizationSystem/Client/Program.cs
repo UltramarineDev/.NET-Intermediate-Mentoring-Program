@@ -22,7 +22,8 @@ namespace Client
 
             var listener = new FileSystemListener(path);
 
-            _ = new FileProcessingService(listener);
+           // _ = new FileProcessingService(listener);
+            _ = new ChunkedFileProcessingService(listener);
 
             listener.Listen();
         }

@@ -20,7 +20,8 @@ namespace Server
                 return;
             }
 
-            var messageQueueService = new MessageQueueService(path);
+         //   var messageQueueService = new MessageQueueService(path);
+            var messageQueueService = new ChunkedMessageQueueService(path);
 
             messageQueueService.Listen();
         }

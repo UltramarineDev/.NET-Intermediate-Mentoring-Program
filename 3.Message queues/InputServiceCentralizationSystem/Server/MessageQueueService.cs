@@ -1,18 +1,16 @@
-﻿using Common;
-using System;
+﻿using System;
 using System.IO;
+using Common;
 using Common.EventArgs;
 
 namespace Server
 {
-    internal class MessageQueueService
+    internal class MessageQueueService : MessageQueueServiceBase
     {
         private readonly RabbitMQClient _queueClient;
-        private readonly string _pathToWrite;
 
-        public MessageQueueService(string pathToWrote)
+        public MessageQueueService(string pathToWrite) : base(pathToWrite)
         {
-            _pathToWrite = pathToWrote;
             _queueClient = new RabbitMQClient();
             _queueClient.MessageReceivedEvent += ProcessMessage;
         }

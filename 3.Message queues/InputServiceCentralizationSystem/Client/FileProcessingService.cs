@@ -1,43 +1,42 @@
 ﻿using System;
 using System.IO;
-using Client.EventArgs;
 using Common;
 using Common.Models;
 
 namespace Client
 {
-    internal class FileProcessingService
+    internal class FileProcessingService : FileProcessingServiceBase
     {
         private readonly RabbitMQClient _queueClient;
-        
-        public FileProcessingService(FileSystemListener listener)
+
+        public FileProcessingService(FileSystemListener listener) : base(listener)
         {
             listener.FileCreatedEvent += HandleFileCreatedEvent;
 
             _queueClient = new RabbitMQClient();
         }
 
-        private void HandleFileCreatedEvent(object sender, FileCreatedEventArgs e)
+        protected override void SendMessage(string path)
         {
-            if (string.IsNullOrEmpty(e.Path))
+            byte[] data;
+            try
             {
+                data = File.ReadAllBytes(path);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Can not read file. Exception: {ex}");
                 return;
             }
 
-            Console.WriteLine($"Start processing {e.Path}");
-            Send(e.Path);
-        }
-
-        private void Send(string path)
-        {
             var message = new FileMessage
             {
                 FileName = Path.GetFileName(path),
-                Data = File.ReadAllBytes(path)
+                Data = data
             };
-            
+
             _queueClient.PublishMessage(message);
-            
+
             Console.WriteLine("Message sent.");
 
             Console.ReadLine();
