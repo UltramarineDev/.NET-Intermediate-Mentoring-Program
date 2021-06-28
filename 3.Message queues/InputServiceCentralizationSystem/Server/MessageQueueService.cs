@@ -5,12 +5,14 @@ using Common.EventArgs;
 
 namespace Server
 {
-    internal class MessageQueueService : MessageQueueServiceBase
+    internal class MessageQueueService
     {
         private readonly RabbitMQClient _queueClient;
+        private readonly string _pathToWrite;
 
-        public MessageQueueService(string pathToWrite) : base(pathToWrite)
+        public MessageQueueService(string pathToWrite)
         {
+            _pathToWrite = pathToWrite;
             _queueClient = new RabbitMQClient();
             _queueClient.MessageReceivedEvent += ProcessMessage;
         }

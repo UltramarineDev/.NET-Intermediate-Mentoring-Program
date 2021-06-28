@@ -6,12 +6,14 @@ using Common.Models;
 
 namespace Server
 {
-    internal class ChunkedMessageQueueService : MessageQueueServiceBase
+    internal class ChunkedMessageQueueService
     {
         private readonly RabbitMQChunkedMessageClient _queueClient;
+        private readonly string _pathToWrite;
 
-        public ChunkedMessageQueueService(string pathToWrite) : base(pathToWrite)
+        public ChunkedMessageQueueService(string pathToWrite)
         {
+            _pathToWrite = pathToWrite;
             _queueClient = new RabbitMQChunkedMessageClient();
             _queueClient.ChunkedMessageReceivedEvent += ProcessChunkedMessage;
         }
