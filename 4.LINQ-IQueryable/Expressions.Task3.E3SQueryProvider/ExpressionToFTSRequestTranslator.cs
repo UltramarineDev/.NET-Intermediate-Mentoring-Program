@@ -25,44 +25,83 @@ namespace Expressions.Task3.E3SQueryProvider
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            if (node.Method.DeclaringType == typeof(Queryable)
-                && node.Method.Name == "Where")
+            switch (node.Method.Name)
             {
-                var predicate = node.Arguments[1];
-                Visit(predicate);
-
-                return node;
+                case "Where" when node.Method.DeclaringType == typeof(Queryable):
+                    var predicate = node.Arguments[1];
+                    Visit(predicate);
+                    return node;
+                
+                case "Equals":
+                    TryVisitMember(node);
+                    Visit(node.Arguments[0]);
+                    _resultStringBuilder.Append(')');
+                    
+                    return node;
+                
+                case "StartsWith":
+                    TryVisitMember(node);
+                    Visit(node.Arguments[0]);
+                    _resultStringBuilder.Append("*)");
+                    
+                    return node;
+                
+                case "EndsWith":
+                    TryVisitMemberWithArguments(node);
+                    _resultStringBuilder.Append(')');
+                    return node;
+                
+                case "Contains":
+                    TryVisitMemberWithArguments(node);
+                    _resultStringBuilder.Append("*)");
+                    return node;
+                
+                default: return base.VisitMethodCall(node);
             }
-            return base.VisitMethodCall(node);
+        }
+        
+        private void TryVisitMemberWithArguments(MethodCallExpression node)
+        {
+            TryVisitMember(node);
+            _resultStringBuilder.Append('*');
+            Visit(node.Arguments[0]);
+        }
+        
+        private void TryVisitMember(MethodCallExpression node)
+        {
+            if (!(node.Object is MemberExpression member))
+            {
+                throw new NotSupportedException($"Operation '{node.Method.Name}' is not supported.");
+            }
+
+            Visit(member);
+            _resultStringBuilder.Append('(');
         }
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
-            switch (node.NodeType)
+            if (node.NodeType != ExpressionType.Equal || node.Left.NodeType == node.Right.NodeType)
             {
-                case ExpressionType.Equal:
-                    if (node.Left.NodeType != ExpressionType.MemberAccess)
-                        throw new NotSupportedException($"Left operand should be property or field: {node.NodeType}");
+                throw new NotSupportedException($"Operation '{node.NodeType}' is not supported");
+            }
 
-                    if (node.Right.NodeType != ExpressionType.Constant)
-                        throw new NotSupportedException($"Right operand should be constant: {node.NodeType}");
+            if (node.Left.NodeType != ExpressionType.MemberAccess)
+            {
+                var expr = Expression.MakeBinary(node.NodeType, node.Right, node.Left);
+                return VisitBinary(expr);
+            }
 
-                    Visit(node.Left);
-                    _resultStringBuilder.Append("(");
-                    Visit(node.Right);
-                    _resultStringBuilder.Append(")");
-                    break;
-
-                default:
-                    throw new NotSupportedException($"Operation '{node.NodeType}' is not supported");
-            };
+            Visit(node.Left);
+            _resultStringBuilder.Append('(');
+            Visit(node.Right);
+            _resultStringBuilder.Append(')');
 
             return node;
         }
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            _resultStringBuilder.Append(node.Member.Name).Append(":");
+            _resultStringBuilder.Append(node.Member.Name).Append(':');
 
             return base.VisitMember(node);
         }
