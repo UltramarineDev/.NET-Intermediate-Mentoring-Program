@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -8,10 +9,12 @@ namespace Expressions.Task3.E3SQueryProvider
     public class ExpressionToFtsRequestTranslator : ExpressionVisitor
     {
         readonly StringBuilder _resultStringBuilder;
+        private readonly List<string> _translations;
 
         public ExpressionToFtsRequestTranslator()
         {
             _resultStringBuilder = new StringBuilder();
+            _translations = new List<string>();
         }
 
         public string Translate(Expression exp)
@@ -21,6 +24,13 @@ namespace Expressions.Task3.E3SQueryProvider
             return _resultStringBuilder.ToString();
         }
 
+        public IEnumerable<string> GetTranslations(Expression exp)
+        {
+            Visit(exp);
+
+            return _translations;
+        }
+        
         #region protected methods
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
@@ -55,7 +65,7 @@ namespace Expressions.Task3.E3SQueryProvider
                     TryVisitMemberWithArguments(node);
                     _resultStringBuilder.Append("*)");
                     return node;
-                
+
                 default: return base.VisitMethodCall(node);
             }
         }
@@ -80,15 +90,42 @@ namespace Expressions.Task3.E3SQueryProvider
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
-            if (node.NodeType != ExpressionType.Equal || node.Left.NodeType == node.Right.NodeType)
+            switch (node.NodeType)
             {
-                throw new NotSupportedException($"Operation '{node.NodeType}' is not supported");
+                case ExpressionType.Equal:
+                    node = ProcessBinaryEquals(node);
+                    return node;
+                
+                case ExpressionType.AndAlso:
+                    ProcessAndAlsoOperand(node.Left);
+                    ProcessAndAlsoOperand(node.Right);
+                    return node;
+                
+                default:
+                    throw new NotSupportedException($"Operation '{node.NodeType}' is not supported.");
+
+            }
+        }
+        
+        private void ProcessAndAlsoOperand(Expression expression)
+        {
+            Visit(expression);
+            _translations.Add(_resultStringBuilder.ToString());
+            _resultStringBuilder.Clear();
+        }
+        
+        private BinaryExpression ProcessBinaryEquals(BinaryExpression node)
+        {
+            if (node.Left.NodeType == node.Right.NodeType)
+            {
+                throw new NotSupportedException($"Operation '{node.NodeType}' is not supported.");
             }
 
             if (node.Left.NodeType != ExpressionType.MemberAccess)
             {
                 var expr = Expression.MakeBinary(node.NodeType, node.Right, node.Left);
-                return VisitBinary(expr);
+                VisitBinary(expr);
+                return node;
             }
 
             Visit(node.Left);

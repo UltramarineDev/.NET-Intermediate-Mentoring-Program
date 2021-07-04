@@ -10,7 +10,10 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Web;
 using Expressions.Task3.E3SQueryProvider.Models.Entities;
+using Expressions.Task3.E3SQueryProvider.Models.Request;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Expressions.Task3.E3SQueryProvider.Test
@@ -34,8 +37,22 @@ namespace Expressions.Task3.E3SQueryProvider.Test
               ],
              */
 
-            // todo: create asserts for this test by yourself, because they will depend on your final implementation
-            throw new NotImplementedException("Please implement this test and the appropriate functionality");
+            var translated = translator.GetTranslations(expression);
+
+            var requestGenerator = new FtsRequestGenerator("http://localhost:59744/");
+            var uri = requestGenerator.GenerateRequestUrl<EmployeeEntity>(translated);
+
+            Assert.NotNull(uri);
+
+            var parsedQuery = HttpUtility.ParseQueryString(uri.Query).Get("query");
+            var ftsQueryRequest = JsonConvert.DeserializeObject<FtsQueryRequest>(parsedQuery);
+            
+            Assert.NotNull(ftsQueryRequest);
+
+            var statements = ftsQueryRequest.Statements;
+
+            Assert.Equal("Workstation:(EPRUIZHW006)", statements[0].Query);
+            Assert.Equal("Manager:(John*)", statements[1].Query);
         }
 
         #endregion
