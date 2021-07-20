@@ -35,18 +35,6 @@ namespace LinqProvider.Services
             
             CustomObjectList = dtCustomer.ToList<Products>();
             return CustomObjectList;
-            //Type elementType = TypeSystem.GetElementType(expression.Type);
-
-            //// return command.ExecuteNonQuery();
-            //return Activator.CreateInstance(
-
-            //    typeof(ObjectReader<>).MakeGenericType(elementType),
-
-            //    BindingFlags.Instance | BindingFlags.NonPublic, null,
-
-            //    new object[] { reader },
-
-            //    null);
         }
 
         private string Translate(Expression expression) => new QueryTranslator().Translate(expression);
