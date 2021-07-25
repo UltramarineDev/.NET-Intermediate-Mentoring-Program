@@ -1,11 +1,8 @@
-﻿using LinqProvider.Services.Models.Enum;
-
-namespace LinqProvider.Services.Entities
+﻿namespace LinqProvider.Services.Data.Entities
 {
     public class Products
     {
-        [SqlColName("ProductID")]
-        public int Id { get; set; }
+        public int ProductID { get; set; }
         public string ProductName { get; set; }
         public decimal UnitPrice { get; set; }
         public int QuantityPerUnit { get; set; }

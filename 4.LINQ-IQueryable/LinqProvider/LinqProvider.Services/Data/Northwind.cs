@@ -1,7 +1,8 @@
 ﻿using System.Data.Common;
-using LinqProvider.Services.Entities;
+using LinqProvider.Services.Data.Entities;
+using LinqProvider.Services.Providers;
 
-namespace LinqProvider.Services
+namespace LinqProvider.Services.Data
 {
     public class Northwind
     {

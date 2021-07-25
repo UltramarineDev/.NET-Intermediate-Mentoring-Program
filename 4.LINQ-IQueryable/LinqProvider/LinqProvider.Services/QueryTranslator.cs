@@ -49,6 +49,10 @@ namespace LinqProvider.Services
                 case ExpressionType.And:
                     _resultQuery.Append(" AND ");
                     break;
+                
+                case ExpressionType.AndAlso:
+                    _resultQuery.Append(" AND ");
+                    break;
 
                 case ExpressionType.Or:
                     _resultQuery.Append(" OR");

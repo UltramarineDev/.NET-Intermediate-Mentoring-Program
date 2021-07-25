@@ -2,15 +2,16 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using LinqProvider.Services.Helpers;
 
-namespace LinqProvider.Services
+namespace LinqProvider.Services.Providers
 {
     public abstract class QueryProvider : IQueryProvider
     {
         public IQueryable CreateQuery(Expression expression)
         {
             //ex. was found in https://docs.microsoft.com/en-us/archive/blogs/mattwar/linq-building-an-iqueryable-provider-part-i
-            Type elementType = TypeSystem.GetElementType(expression.Type);
+            var elementType = TypeSystem.GetElementType(expression.Type);
             try
             {
                 return (IQueryable)Activator.CreateInstance(typeof(QuerySet<>)
