@@ -2,6 +2,8 @@
 {
     internal class Foo
     {
-        // add here some properties
+        internal string Name { get; set; }
+        internal string Surname { get; set; }
+        internal int Age { get; set; }
     }
 }

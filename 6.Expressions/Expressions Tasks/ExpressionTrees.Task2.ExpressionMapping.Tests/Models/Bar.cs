@@ -2,6 +2,8 @@
 {
     internal class Bar
     {
-        // add here some other properties
+        internal string Name { get; set; }
+        internal int Age { get; set; }
+        internal string CompanyName { get; set; }
     }
 }
