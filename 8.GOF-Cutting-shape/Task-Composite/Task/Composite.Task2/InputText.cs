@@ -1,21 +1,29 @@
-﻿using System;
+﻿using System.Xml.Linq;
 
 namespace Composite.Task2
 {
     public class InputText : IComponent
     {
-        string name;
-        string value;
+        private readonly string _name;
+        private readonly string _value;
 
+        private const string Label = "inputText";
+        private const string AttributeNameLabel = "name";
+        private const string AttributeValueLabel = "value";
+        
         public InputText(string name, string value)
         {
-            this.name = name;
-            this.value = value;
+            _name = name;
+            _value = value;
         }
 
         public string ConvertToString(int depth = 0)
         {
-            throw new NotImplementedException();
+            var element = new XElement(Label, 
+                new XAttribute(AttributeNameLabel, _name), 
+                new XAttribute(AttributeValueLabel, _value));
+            
+            return element.ToString();
         }
     }
 }
