@@ -6,10 +6,8 @@ namespace ExpressionTrees.Task2.ExpressionMapping.Tests
     [TestClass]
     public class ExpressionMappingTests
     {
-        // todo: add as many test methods as you wish, but they should be enough to cover basic scenarios of the mapping generator
-
         [TestMethod]
-        public void TestMethod1()
+        public void Map()
         {
             var mapGenerator = new MappingGenerator();
             var mapper = mapGenerator.Generate<Foo, Bar>();
@@ -18,7 +16,8 @@ namespace ExpressionTrees.Task2.ExpressionMapping.Tests
             {
                 Name = "TestName",
                 Surname = "TestSurname",
-                Age = 10
+                Age = 10,
+                Note = "note"
             };
 
             var result = mapper.Map(source);
