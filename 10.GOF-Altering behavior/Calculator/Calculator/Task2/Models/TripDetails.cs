@@ -1,4 +1,4 @@
-﻿namespace Calculator.Task2
+﻿namespace Calculator.Task2.Models
 {
     public class TripDetails
     {

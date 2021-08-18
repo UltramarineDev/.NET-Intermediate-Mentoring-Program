@@ -1,4 +1,6 @@
-﻿namespace Calculator.Task2
+﻿using Calculator.Task2.Interfaces;
+
+namespace Calculator.Task2
 {
     public class CalculatorFactory : ICalculatorFactory
     {
@@ -15,7 +17,7 @@
 
         public ICalculator CreateCachedCalculator()
         {
-            return new CachedInsurancePaymentCalculator();
+            return new CachedInsurancePaymentCalculator(new InsurancePaymentCalculator(currencyService, tripRepository));
         }
 
         public ICalculator CreateCalculator()

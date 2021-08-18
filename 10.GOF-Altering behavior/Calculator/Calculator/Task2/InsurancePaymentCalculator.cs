@@ -1,36 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
+using Calculator.Task2.Interfaces;
+using Calculator.Task2.Models;
 
 namespace Calculator.Task2
 {
     public class InsurancePaymentCalculator : ICalculator
     {
-        private ICurrencyService currencyService;
-        private ITripRepository tripRepository;
+        private ICurrencyService _currencyService;
+        private ITripRepository _tripRepository;
 
         public InsurancePaymentCalculator(
             ICurrencyService currencyService,
             ITripRepository tripRepository)
         {
-            this.currencyService = currencyService;
-            this.tripRepository = tripRepository;
+            _currencyService = currencyService;
+            _tripRepository = tripRepository;
         }
 
         public decimal CalculatePayment(string touristName)
         {
-            throw new NotImplementedException();
-        }
-    }
+            if (string.IsNullOrEmpty(touristName))
+            {
+                throw new ArgumentNullException(nameof(touristName));
+            }
 
-    public class CachedInsurancePaymentCalculator : ICalculator
-    {
-        public CachedInsurancePaymentCalculator()
-        {
-        }
+            var rate = _currencyService.LoadCurrencyRate();
+            var tripDetails = _tripRepository.LoadTrip(touristName);
 
-        public decimal CalculatePayment(string touristName)
-        {
-            throw new NotImplementedException();
+            if (tripDetails == null)
+            {
+                throw new ArgumentNullException($"Received null trip details for tourist {touristName}.");
+            }
+
+            return rate * (Constants.A * tripDetails.FlyCost + Constants.B * tripDetails.AccomodationCost + Constants.C * tripDetails.ExcursionCost);
         }
     }
 }
