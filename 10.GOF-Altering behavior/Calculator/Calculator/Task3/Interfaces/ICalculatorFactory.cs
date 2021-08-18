@@ -1,4 +1,4 @@
-﻿namespace Calculator.Task3
+﻿namespace Calculator.Task3.Interfaces
 {
     public interface ICalculatorFactory
     {

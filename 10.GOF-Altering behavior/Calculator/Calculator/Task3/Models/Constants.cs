@@ -1,4 +1,4 @@
-﻿namespace Calculator.Task3
+﻿namespace Calculator.Task3.Models
 {
     public static class Constants
     {

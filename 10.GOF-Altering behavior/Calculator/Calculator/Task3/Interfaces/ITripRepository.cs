@@ -1,4 +1,6 @@
-﻿namespace Calculator.Task3
+﻿using Calculator.Task3.Models;
+
+namespace Calculator.Task3.Interfaces
 {
     public interface ITripRepository
     {

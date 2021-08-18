@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using Calculator.Task3.Interfaces;
+using Calculator.Task3.Models;
+using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
