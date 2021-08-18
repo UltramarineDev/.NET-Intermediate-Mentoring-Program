@@ -1,4 +1,4 @@
-﻿namespace Calculator.Task4
+﻿namespace Calculator.Task4.Interfaces
 {
     public interface ICurrencyService
     {
