@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Calculator.Task4.Calculators;
+using Calculator.Task4.Interfaces;
 
 namespace Calculator.Task4
 {
@@ -25,7 +26,24 @@ namespace Calculator.Task4
 
         public ICalculator CreateCalculator(bool withLogging, bool withCaching, bool withRounding)
         {
-            throw new NotImplementedException();
+            ICalculator calculator = new InsurancePaymentCalculator(currencyService, tripRepository);
+
+            if (withLogging)
+            {
+                calculator = new LoggingInsurancePaymentCalculator(logger, calculator);
+            }
+
+            if (withCaching)
+            {
+                calculator = new CachedInsurancePaymentCalculator(calculator);
+            }
+
+            if (withRounding)
+            {
+                calculator = new RoundingInsurancePaymentCalculator(calculator);
+            }
+
+            return calculator;
         }
     }
 }

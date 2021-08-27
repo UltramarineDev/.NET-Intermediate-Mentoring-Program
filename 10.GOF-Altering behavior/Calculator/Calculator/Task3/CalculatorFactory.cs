@@ -1,4 +1,7 @@
-﻿namespace Calculator.Task3
+﻿using Calculator.Task3.Calculators;
+using Calculator.Task3.Interfaces;
+
+namespace Calculator.Task3
 {
     public class CalculatorFactory : ICalculatorFactory
     {
@@ -18,7 +21,7 @@
 
         public ICalculator CreateCachedCalculator()
         {
-            return new CachedPaymentDecorator();
+            return new CachedInsurancePaymentCalculator(new InsurancePaymentCalculator(currencyService, tripRepository));
         }
 
         public ICalculator CreateCalculator()
@@ -28,12 +31,12 @@
 
         public ICalculator CreateLoggingCalculator()
         {
-            return new LoggingCalculatorDecorator();
+            return new LoggingInsurancePaymentCalculator(logger, new InsurancePaymentCalculator(currencyService, tripRepository));
         }
 
         public ICalculator CreateRoundingCalculator()
         {
-            return new RoundingCalculatorDecorator();
+            return new RoundingInsurancePaymentCalculator(new InsurancePaymentCalculator(currencyService, tripRepository));
         }
     }
 }

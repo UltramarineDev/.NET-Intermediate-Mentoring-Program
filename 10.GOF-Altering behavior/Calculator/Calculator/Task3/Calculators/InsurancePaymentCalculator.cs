@@ -1,8 +1,8 @@
 ﻿using System;
-using Calculator.Task2.Interfaces;
-using Calculator.Task2.Models;
+using Calculator.Task3.Interfaces;
+using Calculator.Task3.Models;
 
-namespace Calculator.Task2
+namespace Calculator.Task3.Calculators
 {
     public class InsurancePaymentCalculator : ICalculator
     {
