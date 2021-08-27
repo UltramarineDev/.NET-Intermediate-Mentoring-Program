@@ -16,7 +16,7 @@ namespace Composite.Task2.Tests
             var label = new LabelText("myLabel");
             var labelStr = label.ConvertToString();
 
-            labelStr.Should().Be("<label value='myLabel'/>");
+            labelStr.Should().Be("<label value=\"myLabel\" />");
         }
     }
 }

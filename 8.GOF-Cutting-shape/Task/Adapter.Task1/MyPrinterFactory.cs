@@ -4,8 +4,7 @@
     {
         public IMyPrinter CreateMyPrinter(IWriter writer)
         {
-            // return new MyPrinterAdapter(new Printer(writer));
-            return (IMyPrinter)null;
+            return new PrinterAdapter(new Printer(writer));
         }
     }
 }

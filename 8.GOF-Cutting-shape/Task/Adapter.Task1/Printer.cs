@@ -1,5 +1,6 @@
 ﻿namespace Adapter.Task1
 {
+    //can not change
     public class Printer
     {
         private readonly IWriter writer;

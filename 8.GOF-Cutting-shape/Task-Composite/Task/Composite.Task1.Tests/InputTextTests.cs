@@ -16,7 +16,7 @@ namespace Composite.Task1.Tests
             var input = new InputText("myInput", "myInputValue");
             var inputStr = input.ConvertToString();
 
-            inputStr.Should().Be("<inputText name='myInput' value='myInputValue'/>");
+            inputStr.Should().Be("<inputText name=\"myInput\" value=\"myInputValue\" />");
         }
     }
 }

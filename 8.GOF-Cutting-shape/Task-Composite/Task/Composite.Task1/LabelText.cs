@@ -1,19 +1,23 @@
-﻿using System;
+﻿using System.Xml.Linq;
 
 namespace Composite.Task1
 {
     public class LabelText
     {
-        string value;
+        private readonly string _value;
+
+        private const string Label = "label";
+        private const string AttributeLabel = "value";
 
         public LabelText(string value)
         {
-            this.value = value;
+            _value = value;
         }
 
-        public string ConvertToString()
+        public string ConvertToString(int depth = 0)
         {
-            throw new NotImplementedException();
+            var element = new XElement(Label, new XAttribute(AttributeLabel, _value));
+            return element.ToString();
         }
     }
 }

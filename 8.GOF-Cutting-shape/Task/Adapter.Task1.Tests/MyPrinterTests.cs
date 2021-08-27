@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace TemplateMethod.Task1.Tests
 {
+    //print all the elements of this object.
     [TestClass]
     public class MyPrinterTests
     {

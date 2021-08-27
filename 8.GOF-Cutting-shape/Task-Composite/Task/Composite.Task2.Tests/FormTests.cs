@@ -21,9 +21,9 @@ namespace Composite.Task2.Tests
             form.AddComponent(input);
 
             var formStr = form.ConvertToString();
-            var expected = @"<form name='myForm'>
- <label value='myLabel'/>
- <inputText name='myInput' value='myInputValue'/>
+            var expected = @"<form name=""myForm"">
+  <label value=""myLabel"" />
+  <inputText name=""myInput"" value=""myInputValue"" />
 </form>";
 
             formStr.Should().Be(expected);
@@ -48,13 +48,13 @@ namespace Composite.Task2.Tests
             form.AddComponent(formInternal);
 
             var formStr = form.ConvertToString();
-            var expected = @"<form name='myForm'>
- <label value='myLabel'/>
- <inputText name='myInput' value='myInputValue'/>
- <form name='myFormInternal'>
-  <label value='myLabelInternal'/>
-  <inputText name='myInputInternal' value='myInputInternalValue'/>
- </form>
+            var expected = @"<form name=""myForm"">
+  <label value=""myLabel"" />
+  <inputText name=""myInput"" value=""myInputValue"" />
+  <form name=""myFormInternal"">
+    <label value=""myLabelInternal"" />
+    <inputText name=""myInputInternal"" value=""myInputInternalValue"" />
+  </form>
 </form>";
 
             formStr.Should().Be(expected);
